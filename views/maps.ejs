@@ -41,11 +41,11 @@ cursor: crosshair;
 <div id="map">
         <div id="coord">
             <% if(weather !== null){ %>
-                <h2><b><%= weather %></b></h2>
+                <h3><b><%= weather %></b></h3>
             <% } %>
             
             <% if(error !== null){ %>
-                <h2><b><%= error %></b></h2>
+                <h3><b><%= error %></b></h3>
             <% } %>
         </div>
 </div>
@@ -77,6 +77,10 @@ socket.emit('send',{lat: JSON.stringify(features[0]["geometry"]["coordinates"][1
   
 socket.on('maps', function (data) {
     document.getElementById("coord").innerHTML=data["weather"];
+    if(data["error"]!=null){
+      document.getElementById("coord").innerHTML=data["error"];
+    }
+      
   });
 })
 
