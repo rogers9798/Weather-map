@@ -5,6 +5,7 @@
 <title>Weather Maps by @rogers9798</title>
 <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
+<script src="/socket.io/socket.io.js"></script>
 <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
 <style>
 body { margin:0; padding:0; }
@@ -21,9 +22,17 @@ top: 0;
 right: 0;
 bottom: 0;
 height: 50px;
-overflow: hidden;
-background: rgba(255, 255, 255, 0.8);
+overflow: auto;
 }
+
+#map #coord{
+color: red;
+height: 50px;
+font-size: large;
+overflow: auto;
+font-weight: bold;
+}
+
 #map canvas {
 cursor: crosshair;
 }
@@ -32,12 +41,14 @@ cursor: crosshair;
 <div id='map'>
         <div id="coord">
             <% if(weather !== null){ %>
-                <h2 style="color: red;"><b><%= weather %></b></h2>
+                <h2><b><%= weather %></b></h2>
             <% } %>
             
             <% if(error !== null){ %>
                 <h2><b><%= error %></b></h2>
             <% } %>
+
+            
 
         </div>
 </div>
@@ -54,19 +65,23 @@ center: [77,28.6],
 zoom: 6
 });
 
+var socket = io();
+
 map.on('click', function (e) {
-    
+  
 var features = map.queryRenderedFeatures(e.point);
 document.getElementById('features').innerHTML = JSON.stringify(features[0]["geometry"]["coordinates"], null, 2);
 
-document.getElementById("coord").innerHTML+='<form id="checkform" action="/" method="post"><input type="text" name="lat" ><input type="text" name="lon" ><input type="submit" name="sub" value="check"></form>';
+document.getElementById("coord").innerHTML+='<form hidden id="checkform" action="/" method="post"><input hidden type="text" name="lat" ><input hidden type="text" name="lon" ><input hidden type="submit" id="sub" value="check"></form>';
 document.getElementsByName("lat")[0].value=JSON.stringify(features[0]["geometry"]["coordinates"][1], null, 2);
 document.getElementsByName("lon")[0].value=JSON.stringify(features[0]["geometry"]["coordinates"][0], null, 2);
 
-document.getElementById("checkform").submit();
-
-
-});
+socket.emit('send',{lat: JSON.stringify(features[0]["geometry"]["coordinates"][1], null, 2),lon:JSON.stringify(features[0]["geometry"]["coordinates"][0], null, 2)});
+  
+socket.on('maps', function (data) {
+    document.getElementById("coord").innerHTML=data["weather"];
+  });
+})
 
 </script>
 
