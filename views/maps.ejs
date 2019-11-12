@@ -17,21 +17,20 @@ body { margin:0; padding:0; }
  
 <style>
 #features {
-position: absolute;
-font-size: small;
-top: 15px;
+position:fixed;
+top: 0;
 right: 0;
-bottom: 0px;
-height: auto;
-overflow: auto;
-
-}
- #coord{
-color: red;
+bottom: 0;
 height: 50px;
-font-size: medium;
 overflow: auto;
+}
+
+#map #coord{
+color: red;
+height: 55px;
+font-size: large;
 font-weight: bold;
+overflow: auto;
 }
 
 #map canvas {
@@ -39,7 +38,7 @@ cursor: crosshair;
 }
 </style>
 
-<div id='map'>
+<div id="map">
         <div id="coord">
             <% if(weather !== null){ %>
                 <h2><b><%= weather %></b></h2>
@@ -48,13 +47,10 @@ cursor: crosshair;
             <% if(error !== null){ %>
                 <h2><b><%= error %></b></h2>
             <% } %>
-
-            
-
         </div>
 </div>
     
-<div id='features'></div>
+<div hidden id='features'></div>
 
 <script>
 
