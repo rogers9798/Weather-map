@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Weather Maps by @rogers9798</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
+<script src="/socket.io/socket.io.js"></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
+<style>
+body { margin:0; padding:0; }
+#map { position:absolute; top:0; bottom:0; width:100%; }
+
+</style>
+</head>
+<body>
+ 
+<style>
+#features {
+position:fixed;
+top: 0;
+right: 0;
+bottom: 0;
+height: 50px;
+overflow: auto;
+}
+
+#map #coord{
+color: red;
+height: 60px;
+font-size: large;
+font-weight: bold;
+overflow: auto;
+}
+
+#map canvas {
+cursor: crosshair;
+}
+</style>
+
+<div id="map">
+        <div id="coord">
+            <% if(weather !== null){ %>
+                <h3><b><%= weather %></b></h3>
+            <% } %>
+            
+            <% if(error !== null){ %>
+                <h3><b><%= error %></b></h3>
+            <% } %>
+        </div>
+</div>
+    
+<div hidden id='features'></div>
+
+<script>
+
+mapboxgl.accessToken = ''; // mapbox api key (public)
+var map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/mapbox/streets-v11',
+center: [77,28.6],
+zoom: 6
+});
+
+var socket = io();
+
+map.on('click', function (e) {
+  
+var features = map.queryRenderedFeatures(e.point);
+document.getElementById('features').innerHTML = JSON.stringify(features[0]["geometry"]["coordinates"], null, 2);
+
+document.getElementById("coord").innerHTML+='<form hidden id="checkform" action="/" method="post"><input hidden type="text" name="lat" ><input hidden type="text" name="lon" ><input hidden type="submit" id="sub" value="check"></form>';
+document.getElementsByName("lat")[0].value=JSON.stringify(features[0]["geometry"]["coordinates"][1], null, 2);
+document.getElementsByName("lon")[0].value=JSON.stringify(features[0]["geometry"]["coordinates"][0], null, 2);
+
+socket.emit('send',{lat: JSON.stringify(features[0]["geometry"]["coordinates"][1], null, 2),lon:JSON.stringify(features[0]["geometry"]["coordinates"][0], null, 2)});
+  
+socket.on('maps', function (data) {
+    document.getElementById("coord").innerHTML=data["weather"];
+    if(data["error"]!=null){
+      document.getElementById("coord").innerHTML=data["error"];
+    }
+      
+  });
+})
+
+</script>
+
+</body>
+</html>
